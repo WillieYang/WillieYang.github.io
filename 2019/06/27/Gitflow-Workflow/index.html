@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="default">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Git,Version Control,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言随着软件工程和项目管理的逐渐复杂化，各种各样的工具也都不断的涌现，其目的，是为了减轻我们软件工程师的工作量，让我们把更多的精力放到代码的编写上面。其中，Git，作为一个代码的版本控制工具，随着开源的大流，现今已经成为了工程师们在编写代码的过程中，最为青睐，也是最不可分割的一部分。 今天这篇文章会忽略一些简单的Git常识，而会着重阐述一下GitFlow的具体思路，以及在多人协作开发产品过程中，应">
+<meta name="keywords" content="Git,Version Control">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何理解GitFlow工作流，以及其在产品研发过程中的使用方式">
+<meta property="og:url" content="http://yoursite.com/2019/06/27/Gitflow-Workflow/index.html">
+<meta property="og:site_name" content="Willie Yang&#39;s Blog">
+<meta property="og:description" content="前言随着软件工程和项目管理的逐渐复杂化，各种各样的工具也都不断的涌现，其目的，是为了减轻我们软件工程师的工作量，让我们把更多的精力放到代码的编写上面。其中，Git，作为一个代码的版本控制工具，随着开源的大流，现今已经成为了工程师们在编写代码的过程中，最为青睐，也是最不可分割的一部分。 今天这篇文章会忽略一些简单的Git常识，而会着重阐述一下GitFlow的具体思路，以及在多人协作开发产品过程中，应">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-09-15T12:02:50.692Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何理解GitFlow工作流，以及其在产品研发过程中的使用方式">
+<meta name="twitter:description" content="前言随着软件工程和项目管理的逐渐复杂化，各种各样的工具也都不断的涌现，其目的，是为了减轻我们软件工程师的工作量，让我们把更多的精力放到代码的编写上面。其中，Git，作为一个代码的版本控制工具，随着开源的大流，现今已经成为了工程师们在编写代码的过程中，最为青睐，也是最不可分割的一部分。 今天这篇文章会忽略一些简单的Git常识，而会着重阐述一下GitFlow的具体思路，以及在多人协作开发产品过程中，应">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/06/27/Gitflow-Workflow/">
+
+
+
+
+
+  <title>如何理解GitFlow工作流，以及其在产品研发过程中的使用方式 | Willie Yang's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Willie Yang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/27/Gitflow-Workflow/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Willie Yang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Willie Yang's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">如何理解GitFlow工作流，以及其在产品研发过程中的使用方式</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-27T21:11:27+08:00">
+                2019-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>随着软件工程和项目管理的逐渐复杂化，各种各样的工具也都不断的涌现，其目的，是为了减轻我们软件工程师的工作量，让我们把更多的精力放到代码的编写上面。其中，Git，作为一个代码的版本控制工具，随着开源的大流，现今已经成为了工程师们在编写代码的过程中，最为青睐，也是最不可分割的一部分。</p>
+<p>今天这篇文章会忽略一些简单的Git常识，而会着重阐述一下GitFlow的具体思路，以及在多人协作开发产品过程中，应该如何使用GitFlow来完成整个项目的开发。</p>
+<h2 id="什么是GitFlow"><a href="#什么是GitFlow" class="headerlink" title="什么是GitFlow?"></a>什么是GitFlow?</h2><p>GitFlow是Git的一个严格的分支模型设计，它相当于一种工作流模式，被Vincent Driessen at nvie首次提出，并从此流行。主要适用于管理大型的软件工程项目。<code>git-flow</code>是一个Git基础上的扩展与封装，它可以用来简化GitFlow的使用过程，单单使用原生的Git命令也可以进行GitFlow的工作流管理，不过略嫌麻烦。举例子来说，<code>git flow init</code>和<code>git init</code>这两个命令都是新建一个git仓库，不过前者会在后者的基础上，创建更多必要的分支。</p>
+<h2 id="主分支以及开发分支"><a href="#主分支以及开发分支" class="headerlink" title="主分支以及开发分支"></a>主分支以及开发分支</h2><p>GitFlow会使用两个分支来保存工程的历史，分别是主分支(Master Branch)以及开发分支(Develop Branch)，主分支主要是用来保存官方的发布历史，以及使用版本号来给主分支里面的提交(commit)打标签(tag)。开发分支则主要是被用来作为特性(features)的集成分支。(<em>当使用<code>git flow init</code>这个命令的时候，会自动生成master和develop两个分支，如下图</em>)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ git flow init</span><br><span class="line">Initialized empty Git repository <span class="keyword">in</span> ~/project/.git/</span><br><span class="line">No branches exist yet. Base branches must be created now.</span><br><span class="line">Branch name <span class="keyword">for</span> production releases: [master]</span><br><span class="line">Branch name <span class="keyword">for</span> <span class="string">"next release"</span> development: [develop]</span><br><span class="line"></span><br><span class="line">How to name your supporting branch prefixes?</span><br><span class="line">Feature branches? [feature/]</span><br><span class="line">Release branches? [release/]</span><br><span class="line">Hotfix branches? [hotfix/]</span><br><span class="line">Support branches? [support/]</span><br><span class="line">Version tag prefix? []</span><br><span class="line"></span><br><span class="line">$ git branch</span><br><span class="line">* develop</span><br><span class="line">  master</span><br></pre></td></tr></table></figure>
+<h2 id="特性分支"><a href="#特性分支" class="headerlink" title="特性分支"></a>特性分支</h2><p>对于一个正在开发的产品来说，每一个新的特性，都存在它自己的分支。这些分支，将会以开发分支，而不是主分支作为父分支。每当一个产品的特性被完成，这个特性分支(Feature Branch)就会被合并到开发分支里面，而所有的特性分支，都不能与主分支进行直接的交互。</p>
+<p>以下是不使用<code>git-flow</code>创建特性分支的相关命令，需要切换到develop branch然后再创建一个相应feature的branch，之后再切换到该特性分支。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git checkout develop</span><br><span class="line">git checkout -b feature_branch</span><br><span class="line"></span><br><span class="line">git checkout develop</span><br><span class="line">git merge feature_branch</span><br></pre></td></tr></table></figure>
+<p>以下是使用<code>git-flow</code>的相关命令，比较简洁</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> git flow feature start feature_branch</span></span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> git flow feature finish feature_branch</span></span><br></pre></td></tr></table></figure>
+<h2 id="发布分支"><a href="#发布分支" class="headerlink" title="发布分支"></a>发布分支</h2><p>当开发分支已经积攒了足够多的feature的时候，我们可以在开发分支上面分叉出去一个release分支，用于版本发布。这个分支上将不会再添加新的feature，只会被用来修改bug。当bug被修复的差不多了，到了这个release分支可以被用于版本发布的时候，该分支将会被合并到master分支上面去，并打上版本标签。同时这个release分支也会被合并到develop分支上去。（<em>当release分支合并成功以后，该分支将会被删除</em>）</p>
+<p>以下是不使用<code>git-flow</code>时的相关release分支操作命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git checkout develop</span><br><span class="line">git checkout -b release/0.1.0</span><br><span class="line"></span><br><span class="line">git checkout master</span><br><span class="line">git merge release/0.1.0</span><br></pre></td></tr></table></figure>
+<p>以下是使用<code>git-flow</code>时的相关release分支操作命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> git flow release start 0.1.0</span></span><br><span class="line">Switched to a new branch 'release/0.1.0'</span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> git flow release finish <span class="string">'0.1.0'</span></span></span><br></pre></td></tr></table></figure>
+<h2 id="热修复分支"><a href="#热修复分支" class="headerlink" title="热修复分支"></a>热修复分支</h2><p>热修复分支(Hotfix Branch)可以被用来给生产发布的版本进行快速的补丁修复，它是基于主分支的，除此之外，和release, feature分支没有太大的区别，但是这是唯一一个直接从master分支里面分叉出去的分支。一旦bug被修复成功，这个分支将会被合并到master和develop分支里面去，然后master分支将会被打上版本更新的标签(tag)。</p>
+<p>以下是不使用<code>git-flow</code>时的相关hotfix分支操作命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">git checkout master</span><br><span class="line">git checkout -b hotfix_branch</span><br><span class="line"></span><br><span class="line">git checkout master</span><br><span class="line">git merge hotfix_branch</span><br><span class="line">git checkout develop</span><br><span class="line">git merge hotfix_branch</span><br><span class="line">git branch -D hotfix_branch</span><br></pre></td></tr></table></figure>
+<p>以下是使用<code>git-flow</code>时的相关hotfix分支操作命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> git flow hotfix start hotfix_branch</span></span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> git flow hotfix finish hotfix_branch</span></span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总的来说，GitFlow适用于基于发布版本的软件开发工作流，它也为生产环境提供了bug热修复的流程。</p>
+<p>总的工作流程可以分为以下几步：</p>
+<ol>
+<li>开发分支将会基于主分支被创建。</li>
+<li>发布分支将会基于开发分支被创建。</li>
+<li>特性分支将会基于开发分支被创建。</li>
+<li>当一个特性被完成以后，该分支将会被合并到开发分支。</li>
+<li>当一个发布分支完成以后(<code>bug修复完毕</code>)，该分支将会被合并到开发分支和主分支。</li>
+<li>当在主分支里面发现问题以后，一个热修复分支将会基于主分支被创建。</li>
+<li>一旦热更新分支被完成，它将会被合并到主分支和开发分支。</li>
+</ol>
+<h2 id="引用及参考"><a href="#引用及参考" class="headerlink" title="引用及参考"></a>引用及参考</h2><ol>
+<li><a href="https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow" target="_blank" rel="noopener">Gitflow Workflow</a></li>
+<li><a href="https://datasift.github.io/gitflow/IntroducingGitFlow.html" target="_blank" rel="noopener">Introducing GitFlow</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Git/" rel="tag"># Git</a>
+          
+            <a href="/tags/Version-Control/" rel="tag"># Version Control</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/18/React-Login-Control/" rel="next" title="React中如何结合React Router以及Token对登陆权限进行控制">
+                <i class="fa fa-chevron-left"></i> React中如何结合React Router以及Token对登陆权限进行控制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/07/CSS-Conclusion/" rel="prev" title="CSS的初探与总结，从简单到高级用法">
+                CSS的初探与总结，从简单到高级用法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Willie Yang</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是GitFlow"><span class="nav-number">2.</span> <span class="nav-text">什么是GitFlow?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主分支以及开发分支"><span class="nav-number">3.</span> <span class="nav-text">主分支以及开发分支</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#特性分支"><span class="nav-number">4.</span> <span class="nav-text">特性分支</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#发布分支"><span class="nav-number">5.</span> <span class="nav-text">发布分支</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#热修复分支"><span class="nav-number">6.</span> <span class="nav-text">热修复分支</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#引用及参考"><span class="nav-number">8.</span> <span class="nav-text">引用及参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Willie Yang</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
